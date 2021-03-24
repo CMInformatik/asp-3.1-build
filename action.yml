@@ -21,7 +21,7 @@ runs:
   - name: Ensure MyGet NuGet Source  
     shell: bash
     run: |
-      if [${{ inputs.myget-pre-auth-url }}]; then \
+      if [ ${{ inputs.myget-pre-auth-url }} ]; then \
         dotnet nuget add source ${{ inputs.myget-pre-auth-url }} -n myget --configfile /tmp/nuget.config \
       fi
   - name: Prepare
