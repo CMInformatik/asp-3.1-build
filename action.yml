@@ -46,6 +46,7 @@ runs:
       cat test.txt
       if [ "$MYGET_PRE_AUTH_URL" ]; then
         dotnet new nugetconfig -o "./nuget.config"
+        ls -la
         dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile "./nuget.config"
       fi
       docker buildx install
