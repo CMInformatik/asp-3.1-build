@@ -9,13 +9,16 @@ runs:
   using: "composite"
   steps:
   - name: Add nuget.config
+    shell: bash
     run: |
       dotnet new nugetconfig -o /tmp/nuget.config
   - name: Ensure MyGet NuGet Source  
+    shell: bash
     run: |
       dotnet nuget add source ${{ secrets.MYGET_PRE_AUTH_URL }} -n myget --configfile /tmp/nuget.config
   - name: Prepare
     id: prep
+    shell: bash
     run: |
       DOCKER_IMAGE=registry.cmicloud.ch:4443/${{ inputs.app-name }}
       VERSION=edge
@@ -34,13 +37,16 @@ runs:
       echo ::set-output name=tags::${TAGS}
       echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
   - name: Set up Docker Buildx
+    shell: bash
     run: docker buildx install
   - name: Login to our Registry
     env:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+    shell: bash
     run: docker login "$DOCKER_USERNAME"  foo --password "$DOCKER_PASSWORD" 
   - name: Build and push
+    shell: bash
     run: |
       docker build . --secret id=nuget_config,src=/tmp/nuget.config \
       ${{ steps.prep.outputs.tags }}
@@ -48,13 +54,18 @@ runs:
       --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
       --label org.opencontainers.image.revision=${{ github.sha }}
   - name: remove nuget config
+    shell: bash
     run: rm -f /tmp/nuget.config
   - name: create extractcontainer
+    shell: bash
     run: read tag <<< $(docker images -q) && docker create --name extract "$tag"
   - name: extract buildresult
+    shell: bash
     run: docker cp extract:/app ./extracted-app
   - name: remove extractcontainer
+    shell: bash
     run: docker rm extract
   - name: Upload artifacts using uploadArtifact()
+    shell: bash
     run: |
       node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
