@@ -5,10 +5,8 @@ inputs:
     description: 'Name for artifacts and Docker images'
     required: true
     default: 'aspapp'
-outputs:
 runs:
   using: "composite"
-  runs-on: ubuntu-latest
   steps:
   - uses: actions/checkout@v2
   - name: Add nuget.config
@@ -29,34 +27,27 @@ runs:
       elif [[ $GITHUB_REF == refs/pull/* ]]; then
         VERSION=pr-${{ github.event.number }}
       fi
-      TAGS="${DOCKER_IMAGE}:${VERSION}"
+      TAGS="-t ${DOCKER_IMAGE}:${VERSION}"
       if [ "${{ github.event_name }}" = "push" ]; then
-        TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
+        TAGS="$TAGS -t ${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
       fi
       echo ::set-output name=version::${VERSION}
       echo ::set-output name=tags::${TAGS}
       echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
   - name: Set up Docker Buildx
-    uses: docker/setup-buildx-action@v1
+    run: docker buildx install
   - name: Login to our Registry
-    if: github.event_name != 'pull_request'
-    uses: docker/login-action@v1 
-    with:
-      registry: registry.cmicloud.ch:4443
-      username: ${{ secrets.DOCKER_USERNAME }}
-      password: ${{ secrets.DOCKER_PASSWORD }}
+    env:
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+    run: docker login "$DOCKER_USERNAME"  foo --password "$DOCKER_PASSWORD" 
   - name: Build and push
-    uses: docker/build-push-action@v2
-    with:
-      context: .
-      push: ${{ github.event_name != 'pull_request' }}
-      tags: ${{ steps.prep.outputs.tags }}
-      secrets: |
-        "nuget_config=/tmp/nuget.config"
-      labels: |
-        org.opencontainers.image.source=${{ github.event.repository.html_url }}
-        org.opencontainers.image.created=${{ steps.prep.outputs.created }}
-        org.opencontainers.image.revision=${{ github.sha }}
+    run: |
+      docker build . --secret id=nuget_config,src=/tmp/nuget.config \
+      ${{ steps.prep.outputs.tags }}
+      --label org.opencontainers.image.source=${{ github.event.repository.html_url }} \
+      --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
+      --label org.opencontainers.image.revision=${{ github.sha }}
   - name: remove nuget config
     run: rm -f /tmp/nuget.config
   - name: create extractcontainer
@@ -65,8 +56,6 @@ runs:
     run: docker cp extract:/app ./extracted-app
   - name: remove extractcontainer
     run: docker rm extract
-  - name: publish artifact
-    uses: actions/upload-artifact@v1
-    with:
-      name: ${{ inputs.app-name }} Release Build
-      path: ./extracted-app
+  - name: Upload artifacts using uploadArtifact()
+      run: |
+        node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
