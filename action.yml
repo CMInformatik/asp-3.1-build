@@ -17,14 +17,14 @@ runs:
   - name: Add nuget.config
     shell: bash
     run: |
-      dotnet new nugetconfig -o /tmp/nuget.config
+      dotnet new nugetconfig -o ./nuget.config
   - name: Ensure MyGet NuGet Source  
     shell: bash
     env: 
       MYGET_PRE_AUTH_URL: ${{ inputs.myget-pre-auth-url }}
     run: |
       if [ "$MYGET_PRE_AUTH_URL" ]; then
-        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile /tmp/nuget.config
+        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile ./nuget.config
       fi
   - name: Prepare
     id: prep
@@ -58,14 +58,14 @@ runs:
   - name: Build and push
     shell: bash
     run: |
-      docker build . --secret id=nuget_config,src=/tmp/nuget.config \
+      docker build ./code --secret id=nuget_config,src=./nuget.config \
       ${{ steps.prep.outputs.tags }} \
       --label org.opencontainers.image.source=${{ github.event.repository.html_url }} \
       --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
       --label org.opencontainers.image.revision=${{ github.sha }}
   - name: remove nuget config
     shell: bash
-    run: rm -f /tmp/nuget.config
+    run: rm -f /.nuget.config
   - name: create extractcontainer
     shell: bash
     run: read tag <<< $(docker images -q) && docker create --name extract "$tag"
