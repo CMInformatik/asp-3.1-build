@@ -5,6 +5,12 @@ inputs:
     description: 'Name for artifacts and Docker images'
     required: true
     default: 'aspapp'
+  myget-pre-auth-url:
+    default: ''
+  docker-username:
+    required: true
+  docker-password:
+    required: true
 runs:
   using: "composite"
   steps:
@@ -15,7 +21,9 @@ runs:
   - name: Ensure MyGet NuGet Source  
     shell: bash
     run: |
-      dotnet nuget add source ${{ secrets.MYGET_PRE_AUTH_URL }} -n myget --configfile /tmp/nuget.config
+    if [${{ inputs.myget-pre-auth-url }}]; then \
+      dotnet nuget add source ${{ inputs.myget-pre-auth-url }} -n myget --configfile /tmp/nuget.config \
+    fi
   - name: Prepare
     id: prep
     shell: bash
@@ -41,8 +49,8 @@ runs:
     run: docker buildx install
   - name: Login to our Registry
     env:
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ inputs.docker-password }}
+      DOCKER_USERNAME: ${{ inputs.dpcker-username }}
     shell: bash
     run: docker login "$DOCKER_USERNAME"  foo --password "$DOCKER_PASSWORD" 
   - name: Build and push
