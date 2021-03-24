@@ -20,9 +20,11 @@ runs:
       dotnet new nugetconfig -o /tmp/nuget.config
   - name: Ensure MyGet NuGet Source  
     shell: bash
+    env: 
+      MYGET_PRE_AUTH_URL: ${{ inputs.myget-pre-auth-url }}
     run: |
-      if [ ${{ inputs.myget-pre-auth-url }} ]; then \
-        dotnet nuget add source ${{ inputs.myget-pre-auth-url }} -n myget --configfile /tmp/nuget.config \
+      if [ "$MYGET_PRE_AUTH_URL" ]; then \
+        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile /tmp/nuget.config \
       fi
   - name: Prepare
     id: prep
