@@ -83,5 +83,6 @@ runs:
     env: 
       ACTIONS_RUNTIME_TOKEN: ${{ inputs.github-token }}
     run: |
+      zip -r ./${{ inputs.app-name }}.zip ./extracted-app
       npm install @actions/artifact
-      node -e "Promise.resolve(require('@actions/artifact').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
+      node -e "Promise.resolve(require('@actions/artifact').create().uploadArtifact('${{ inputs.app-name }}',['./${{ inputs.app-name }}.zip'], '.'))"
