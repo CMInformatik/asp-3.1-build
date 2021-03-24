@@ -17,14 +17,14 @@ runs:
   - name: Add nuget.config
     shell: bash
     run: |
-      dotnet new nugetconfig -o ./nuget.config
+      dotnet new nugetconfig -o "$GITHUB_WORKSPACE/nuget.config"
   - name: Ensure MyGet NuGet Source  
     shell: bash
     env: 
       MYGET_PRE_AUTH_URL: ${{ inputs.myget-pre-auth-url }}
     run: |
       if [ "$MYGET_PRE_AUTH_URL" ]; then
-        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile ./nuget.config
+        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile "$GITHUB_WORKSPACE/nuget.config"
       fi
   - name: Prepare
     id: prep
@@ -58,24 +58,24 @@ runs:
   - name: Build and push
     shell: bash
     run: |
-      docker build ./code --secret id=nuget_config,src=./nuget.config \
+      docker build "$GITHUB_WORKSPACE/code" --secret "id=nuget_config,src=$GITHUB_WORKSPACE/nuget.config"\
       ${{ steps.prep.outputs.tags }} \
       --label org.opencontainers.image.source=${{ github.event.repository.html_url }} \
       --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
       --label org.opencontainers.image.revision=${{ github.sha }}
   - name: remove nuget config
     shell: bash
-    run: rm -f /.nuget.config
+    run: rm -f "$GITHUB_WORKSPACE/nuget.config"
   - name: create extractcontainer
     shell: bash
     run: read tag <<< $(docker images -q) && docker create --name extract "$tag"
   - name: extract buildresult
     shell: bash
-    run: docker cp extract:/app ./extracted-app
+    run: docker cp extract:/app "$GITHUB_WORKSPACE/extracted-app"
   - name: remove extractcontainer
     shell: bash
     run: docker rm extract
   - name: Upload artifacts using uploadArtifact()
     shell: bash
     run: |
-      node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
+      node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['$GITHUB_WORKSPACE/extracted-app'], '${{ github.workspace }}'))"
