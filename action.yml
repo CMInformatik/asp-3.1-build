@@ -23,8 +23,8 @@ runs:
     env: 
       MYGET_PRE_AUTH_URL: ${{ inputs.myget-pre-auth-url }}
     run: |
-      if [ "$MYGET_PRE_AUTH_URL" ]; then \
-        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile /tmp/nuget.config \
+      if [ "$MYGET_PRE_AUTH_URL" ]; then
+        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile /tmp/nuget.config
       fi
   - name: Prepare
     id: prep
@@ -59,7 +59,7 @@ runs:
     shell: bash
     run: |
       docker build . --secret id=nuget_config,src=/tmp/nuget.config \
-      ${{ steps.prep.outputs.tags }}
+      ${{ steps.prep.outputs.tags }} \
       --label org.opencontainers.image.source=${{ github.event.repository.html_url }} \
       --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
       --label org.opencontainers.image.revision=${{ github.sha }}
