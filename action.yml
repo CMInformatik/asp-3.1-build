@@ -59,7 +59,7 @@ runs:
   - name: Build and push
     shell: bash
     run: |
-      docker build . --secret id=nuget_config,src=/tmp/nuget.config \
+      docker build code --secret id=nuget_config,src=/tmp/nuget.config \
       ${{ steps.prep.outputs.tags }} \
       --label org.opencontainers.image.source=${{ github.event.repository.html_url }} \
       --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
