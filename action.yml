@@ -41,11 +41,9 @@ runs:
       DOCKER_USERNAME: ${{ inputs.docker-username }}
     shell: bash
     run: |
-
       if [ "$MYGET_PRE_AUTH_URL" ]; then
-        dotnet new nugetconfig -o nuget.config
-        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget
-        cat nuget.config
+        dotnet new nugetconfig
+        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile nuget.config
       fi
       docker buildx install
       docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD" 
