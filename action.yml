@@ -14,18 +14,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Add nuget.config
-    shell: bash
-    run: |
-      dotnet new nugetconfig -o "/github/workspace/nuget.config"
-  - name: Ensure MyGet NuGet Source  
-    shell: bash
-    env: 
-      MYGET_PRE_AUTH_URL: ${{ inputs.myget-pre-auth-url }}
-    run: |
-      if [ "$MYGET_PRE_AUTH_URL" ]; then
-        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile "/github/workspace/nuget.config"
-      fi
   - name: Prepare
     id: prep
     shell: bash
@@ -46,36 +34,29 @@ runs:
       echo ::set-output name=version::${VERSION}
       echo ::set-output name=tags::${TAGS}
       echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-  - name: Set up Docker Buildx
-    shell: bash
-    run: docker buildx install
-  - name: Login to our Registry
+  - name: Build Dockerfile and upload built artifact
     env:
+      MYGET_PRE_AUTH_URL: ${{ inputs.myget-pre-auth-url }}
       DOCKER_PASSWORD: ${{ inputs.docker-password }}
       DOCKER_USERNAME: ${{ inputs.docker-username }}
     shell: bash
-    run: docker login "$DOCKER_USERNAME"  foo --password "$DOCKER_PASSWORD" 
-  - name: Build and push
-    shell: bash
     run: |
-      docker build "/github/workspace/code" --secret "id=nuget_config,src=/github/workspace/nuget.config"\
+      if [ "$MYGET_PRE_AUTH_URL" ]; then
+        dotnet new nugetconfig -o "./nuget.config"
+        dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile "./nuget.config"
+      fi
+      docker buildx install
+      docker login "$DOCKER_USERNAME"  foo --password "$DOCKER_PASSWORD" 
+      docker build "./code" --secret "id=nuget_config,src=./nuget.config"\
       ${{ steps.prep.outputs.tags }} \
       --label org.opencontainers.image.source=${{ github.event.repository.html_url }} \
       --label org.opencontainers.image.created=${{ steps.prep.outputs.created }} \
       --label org.opencontainers.image.revision=${{ github.sha }}
-  - name: remove nuget config
-    shell: bash
-    run: rm -f "/github/workspace/nuget.config"
-  - name: create extractcontainer
-    shell: bash
-    run: read tag <<< $(docker images -q) && docker create --name extract "$tag"
-  - name: extract buildresult
-    shell: bash
-    run: docker cp extract:/app "/github/workspace/extracted-app"
-  - name: remove extractcontainer
-    shell: bash
-    run: docker rm extract
-  - name: Upload artifacts using uploadArtifact()
-    shell: bash
-    run: |
-      node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['/github/workspace/extracted-app'], '${{ github.workspace }}'))"
+
+      rm -f "./nuget.config"
+      read tag <<< $(docker images -q) && docker create --name extract "$tag"
+      docker cp extract:/app "./extracted-app"
+      docker rm extract
+
+      node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
+      
