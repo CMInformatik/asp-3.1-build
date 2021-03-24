@@ -50,7 +50,7 @@ runs:
   - name: Login to our Registry
     env:
       DOCKER_PASSWORD: ${{ inputs.docker-password }}
-      DOCKER_USERNAME: ${{ inputs.dpcker-username }}
+      DOCKER_USERNAME: ${{ inputs.docker-username }}
     shell: bash
     run: docker login "$DOCKER_USERNAME"  foo --password "$DOCKER_PASSWORD" 
   - name: Build and push
