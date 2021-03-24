@@ -79,4 +79,5 @@ runs:
   - name: Upload artifacts using uploadArtifact()
     shell: bash
     run: |
-      node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
+      npm install @actions/artifact
+      node -e "Promise.resolve(require('./node_modules/@actions/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
