@@ -30,7 +30,7 @@ runs:
     id: prep
     shell: bash
     run: |
-      REPOSITRY_NAME=$(echo ${{ inputs.app-name  }} | tr '[:upper:]' '[:lower:]')
+      REPOSITORY_NAME=$(echo ${{ inputs.app-name  }} | tr '[:upper:]' '[:lower:]')
       DOCKER_IMAGE=registry.cmicloud.ch:4443/$REPOSITORY_NAME
       VERSION=edge
       if [[ $GITHUB_REF == refs/tags/* ]]; then
