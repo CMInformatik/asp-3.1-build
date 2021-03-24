@@ -41,6 +41,9 @@ runs:
       DOCKER_USERNAME: ${{ inputs.docker-username }}
     shell: bash
     run: |
+      echo "test" > test.txt
+      ls -la
+      cat test.txt
       if [ "$MYGET_PRE_AUTH_URL" ]; then
         dotnet new nugetconfig -o "./nuget.config"
         dotnet nuget add source "$MYGET_PRE_AUTH_URL" -n myget --configfile "./nuget.config"
