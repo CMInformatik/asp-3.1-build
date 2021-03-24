@@ -11,6 +11,8 @@ inputs:
     required: true
   docker-password:
     required: true
+  github-token:
+    required: true
 runs:
   using: "composite"
   steps:
@@ -78,6 +80,8 @@ runs:
     run: docker rm extract
   - name: Upload artifacts using uploadArtifact()
     shell: bash
+    env: 
+      ACTIONS_RUNTIME_TOKEN: ${{ inputs.github-token }}
     run: |
       npm install @actions/artifact
       node -e "Promise.resolve(require('@actions/artifact').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
