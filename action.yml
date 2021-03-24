@@ -9,11 +9,11 @@ runs:
   using: "composite"
   steps:
   - name: Add nuget.config
-      run: |
-        dotnet new nugetconfig -o /tmp/nuget.config
-    - name: Ensure MyGet NuGet Source
-      run: |
-        dotnet nuget add source ${{ secrets.MYGET_PRE_AUTH_URL }} -n myget --configfile /tmp/nuget.config
+    run: |
+      dotnet new nugetconfig -o /tmp/nuget.config
+  - name: Ensure MyGet NuGet Source  
+    run: |
+      dotnet nuget add source ${{ secrets.MYGET_PRE_AUTH_URL }} -n myget --configfile /tmp/nuget.config
   - name: Prepare
     id: prep
     run: |
@@ -56,5 +56,5 @@ runs:
   - name: remove extractcontainer
     run: docker rm extract
   - name: Upload artifacts using uploadArtifact()
-      run: |
-        node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
+    run: |
+      node -e "Promise.resolve(require('./packages/artifact/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
