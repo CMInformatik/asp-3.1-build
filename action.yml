@@ -80,4 +80,4 @@ runs:
     shell: bash
     run: |
       npm install @actions/artifact
-      node -e "Promise.resolve(require('./node_modules/@actions/lib/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
+      node -e "Promise.resolve(require('@actions/artifact-client').create().uploadArtifact('${{ inputs.app-name }}',['./extracted-app'], '${{ github.workspace }}'))"
