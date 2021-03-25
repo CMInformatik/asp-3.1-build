@@ -29,6 +29,7 @@ async function runStep(step, displayText) {
         await step();
     } catch (error) {
         core.setFailed(`Step "${displayText}" failed. Error: ${error.message}`);
+        throw error;
     }
 }
 
@@ -44,7 +45,7 @@ async function logInDockerRegistry() {
 }
 
 async function setUpDockerBuildX() {
-    await exec.exec('docker buildX install');
+    await exec.exec('docker buildx install');
 }
 
 async function prepare() {
