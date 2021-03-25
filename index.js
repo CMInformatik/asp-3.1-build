@@ -3,6 +3,7 @@ const github = require('@actions/github');
 const exec = require('@actions/exec');
 
 let dockerRegistry = 'registry.cmicloud.ch:4443';
+let tags;
 
 async function run() {
     try {
@@ -14,10 +15,16 @@ async function run() {
         await prepare();
         await setUpDockerBuildX();
         await logInDockerRegistry();
+        await buildAndPush();
 
     } catch (error) {
         core.setFailed(error.message);
     }
+}
+
+async function buildAndPush() {
+    console.log('Build and push');
+    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config ${tags}`);
 }
 
 async function logInDockerRegistry() {
@@ -39,7 +46,7 @@ async function prepare() {
     let dockerImage = `${dockerRegistry}/${repositoryName}`;
     let version = 'edge';
 
-    let tags = `-t ${dockerImage}:${version}`;
+    tags = `-t ${dockerImage}:${version}`;
     if(github.context.eventName === 'push') {
         tags += ` -t ${dockerImage}:${github.context.sha}`;
     }
