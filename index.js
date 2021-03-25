@@ -23,6 +23,7 @@ async function logInDockerRegistry() {
     let password = core.getInput('docker-password');
     let username = core.getInput('docker-username');
 
+    console.log(username);
     await exec.exec(`docker login --username "${username}" --password "${password}"`);
 }
 
