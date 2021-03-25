@@ -4,9 +4,12 @@ const exec = require('@actions/exec');
 
 async function run() {
     try {
-      await exec.exec('echo test');
+        console.log('Add nuget.config');
+        await exec.exec('dotnet new nugetconfig -o /tmp');
+
+        await exec.exec('echo test');
     } catch (error) {
-      core.setFailed(error.message);
+        core.setFailed(error.message);
     }
   }
 
