@@ -1,67 +1,73 @@
+// noinspection JSUnresolvedFunction
 const core = require('@actions/core');
+
+// noinspection JSUnresolvedFunction
 const github = require('@actions/github');
+
+// noinspection JSUnresolvedFunction
 const exec = require('@actions/exec');
 
-let dockerRegistry = 'registry.cmicloud.ch:4443';
-let tags;
+// Input variable names
+const inputDockerPassword = 'docker-password';
+const inputDockerUsername = 'docker-username';
+const inputAppName = 'app-name';
+const myGetPreAuthUrl = 'myget-pre-auth-url';
+
+// Action variables
+let actionVariables = new ActionVariables();
 
 async function run() {
+    await runStep(addNuGetConfig, 'Add NuGet config.');
+    await runStep(ensureMyGetNuGetSource, 'Ensure MyGet NuGet source.');
+    await runStep(prepare, 'Prepare docker variables.');
+    await runStep(setUpDockerBuildX, 'SetUp docker buildX');
+    await runStep(logInDockerRegistry, 'Login docker registry');
+    //await runStep(buildAndPush, 'Build and push docker container');
+}
+
+async function runStep(step, displayText) {
     try {
-        console.log('Setting variables');
-        const myGetNuGetSource = core.getInput('myget-pre-auth-url');
-
-        await addNugetConfig();
-        await ensureMyGetNuGetSource(myGetNuGetSource);
-        await prepare();
-        await setUpDockerBuildX();
-        await logInDockerRegistry();
-        await buildAndPush();
-
+        console.log(displayText);
+        await step();
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed(`Step "${displayText}" failed. Error: ${error.message}`);
     }
 }
 
 async function buildAndPush() {
-    console.log('Build and push');
-    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config ${tags}`);
+    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config ${actionVariables.tags}`);
 }
 
 async function logInDockerRegistry() {
-    console.log('Log in to docker registry');
-    let password = core.getInput('docker-password');
-    let username = core.getInput('docker-username');
+    let password = core.getInput(inputDockerPassword);
+    let username = core.getInput(inputDockerUsername);
 
-    console.log(username);
-    await exec.exec(`docker login ${dockerRegistry} --username "${username}" --password "${password}"`);
+    await exec.exec(`docker login ${actionVariables.dockerRegistry} --username "${username}" --password "${password}"`);
 }
 
 async function setUpDockerBuildX() {
-    console.log('Set up docker buildx');
-    await exec.exec('docker buildx install');
+    await exec.exec('docker buildX install');
 }
 
 async function prepare() {
-    let repositoryName = core.getInput('app-name').toLowerCase();
-    let dockerImage = `${dockerRegistry}/${repositoryName}`;
+    let repositoryName = core.getInput(inputAppName).toLowerCase();
+    let dockerImage = `${actionVariables.dockerRegistry}/${repositoryName}`;
     let version = 'edge';
 
-    tags = `-t ${dockerImage}:${version}`;
+    actionVariables.tags = `-t ${dockerImage}:${version}`;
     if(github.context.eventName === 'push') {
-        tags += ` -t ${dockerImage}:${github.context.sha}`;
+        actionVariables.tags += ` -t ${dockerImage}:${github.context.sha}`;
     }
 
-
-    /* TODO Version */
+    /* TODO */
 }
 
-async function addNugetConfig() {
-    console.log('Add nuget.config');
+async function addNuGetConfig() {
     await exec.exec('dotnet new nugetconfig -o /tmp');
 }
 
-async function ensureMyGetNuGetSource(myGetNuGetSource) {
-    console.log('Ensure MyGet NuGet Source');
+async function ensureMyGetNuGetSource() {
+    let myGetNuGetSource = core.getInput(myGetPreAuthUrl);
     if(myGetNuGetSource) {
         await exec.exec(`dotnet nuget add source "${myGetNuGetSource}" -n myget --configfile /tmp/nuget.config`)
     }
