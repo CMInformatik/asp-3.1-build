@@ -2,6 +2,8 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require('@actions/exec');
 
+let dockerRegistry = 'registry.cmicloud.ch:4443';
+
 async function run() {
     try {
         console.log('Setting variables');
@@ -24,7 +26,7 @@ async function logInDockerRegistry() {
     let username = core.getInput('docker-username');
 
     console.log(username);
-    await exec.exec(`docker login --username "${username}" --password "${password}"`);
+    await exec.exec(`docker login ${dockerRegistry} --username "${username}" --password "${password}"`);
 }
 
 async function setUpDockerBuildX() {
@@ -34,11 +36,8 @@ async function setUpDockerBuildX() {
 
 async function prepare() {
     let repositoryName = core.getInput('app-name').toLowerCase();
-    let dockerImage = `registry.cmicloud.ch:4443/${repositoryName}`;
+    let dockerImage = `${dockerRegistry}/${repositoryName}`;
     let version = 'edge';
-
-    // Set environment variable
-    await exec.exec(`DOCKER_IMAGE=${repositoryName}`);
 
     let tags = `-t ${dockerImage}:${version}`;
     if(github.context.eventName === 'push') {
