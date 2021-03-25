@@ -1,10 +1,7 @@
-// noinspection JSUnresolvedFunction
+require('/actionVariables.js');
+
 const core = require('@actions/core');
-
-// noinspection JSUnresolvedFunction
 const github = require('@actions/github');
-
-// noinspection JSUnresolvedFunction
 const exec = require('@actions/exec');
 
 // Input variable names
