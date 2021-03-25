@@ -1,5 +1,4 @@
-require('/actionVariables.js');
-
+const actionVariablesClass = require('actionVariables.js');
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require('@actions/exec');
@@ -11,7 +10,7 @@ const inputAppName = 'app-name';
 const myGetPreAuthUrl = 'myget-pre-auth-url';
 
 // Action variables
-let actionVariables = new ActionVariables();
+let actionVariables = new actionVariablesClass.ActionVariables();
 
 async function run() {
     await runStep(addNuGetConfig, 'Add NuGet config.');

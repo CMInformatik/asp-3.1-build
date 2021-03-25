@@ -4,3 +4,5 @@ class ActionVariables {
         this.tags = '';
     }
 }
+
+module.exports.ActionVariables = ActionVariables;
