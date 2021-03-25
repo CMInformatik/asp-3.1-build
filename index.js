@@ -19,10 +19,12 @@ async function run() {
 }
 
 async function logInDockerRegistry() {
+    console.log('Log in to docker registry');
     let password = core.getInput('docker-password');
     let username = core.getInput('docker-username');
 
-    await exec.exec(`winpty docker login --username "${username}" --password "${password}"`);
+    console.log(username + '-' + password);
+    await exec.exec(`docker login --username "${username}" --password "${password}"`);
 }
 
 async function setUpDockerBuildX() {
