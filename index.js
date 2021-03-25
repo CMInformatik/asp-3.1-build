@@ -25,8 +25,11 @@ async function run() {
 
 async function runStep(step, displayText) {
     try {
-        console.log(displayText);
+        console.log(`${displayText} started.`);
+
         await step();
+
+        console.log(`${displayText} finished.`)
     } catch (error) {
         core.setFailed(`Step "${displayText}" failed. Error: ${error.message}`);
         throw error;
