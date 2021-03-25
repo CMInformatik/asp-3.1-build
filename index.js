@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require('@actions/exec');
-const actionVariablesClass = require('actionVariables.js');
+const actionVariablesClass = require('actionVariables');
 
 // Input variable names
 const inputDockerPassword = 'docker-password';
