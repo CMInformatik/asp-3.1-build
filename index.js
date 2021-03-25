@@ -37,6 +37,9 @@ async function prepare() {
     let dockerImage = `registry.cmicloud.ch:4443/${repositoryName}`;
     let version = 'edge';
 
+    // Set environment variable
+    await exec.exec(`DOCKER_IMAGE=${repositoryName}`);
+
     let tags = `-t ${dockerImage}:${version}`;
     if(github.context.eventName === 'push') {
         tags += ` -t ${dockerImage}:${github.context.sha}`;
