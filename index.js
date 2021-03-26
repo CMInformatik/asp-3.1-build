@@ -22,6 +22,7 @@ async function run() {
     await runStep(logInDockerRegistry, 'Login docker registry');
     await runStep(buildAndPush, 'Build and push docker container');
     await runStep(removeNuGetConfig, 'Remove NuGet config');
+    await runStep(createExtractContainer, 'Create extract container');
     await runStep(extractBuildResult, 'Extract build result');
     await runStep(removeExtractContainer, 'Remove extract container');
 }
@@ -45,6 +46,10 @@ async function buildAndPush() {
 
 async function extractBuildResult() {
     await exec.exec('docker cp extract:/app ./extracted-app');
+}
+
+async function createExtractContainer() {
+    await exec.exec('read tag <<< $(docker images -q) && docker create --name extract "$tag"');
 }
 
 async function removeExtractContainer() {
