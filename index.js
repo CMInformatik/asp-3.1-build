@@ -20,7 +20,7 @@ async function run() {
     await runStep(prepare, 'Prepare docker variables.');
     await runStep(setUpDockerBuildX, 'SetUp docker buildX');
     await runStep(logInDockerRegistry, 'Login docker registry');
-    //await runStep(buildAndPush, 'Build and push docker container');
+    await runStep(buildAndPush, 'Build and push docker container');
 }
 
 async function runStep(step, displayText) {
@@ -54,12 +54,9 @@ async function setUpDockerBuildX() {
 async function prepare() {
     let repositoryName = core.getInput(inputAppName).toLowerCase();
     let dockerImage = `${actionVariables.dockerRegistry}/${repositoryName}`;
-    let version = 'edge';
+    let version = `pr-${github.context.runNumber}`;
 
     actionVariables.tags = `-t ${dockerImage}:${version}`;
-    if(github.context.eventName === 'push') {
-        actionVariables.tags += ` -t ${dockerImage}:${github.context.sha}`;
-    }
 
     /* TODO */
 }
