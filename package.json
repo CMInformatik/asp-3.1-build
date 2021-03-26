@@ -5,6 +5,7 @@
     "@actions/core": "latest",
     "@actions/exec": "latest",
     "@actions/github": "latest",
-    "@actions/glob": "latest"
+    "@actions/glob": "latest",
+    "@actions/artifact": "latest"
   }
 }
