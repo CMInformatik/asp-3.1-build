@@ -21,6 +21,9 @@ async function run() {
     await runStep(setUpDockerBuildX, 'SetUp docker buildX');
     await runStep(logInDockerRegistry, 'Login docker registry');
     await runStep(buildAndPush, 'Build and push docker container');
+    await runStep(removeNuGetConfig, 'Remove NuGet config');
+    await runStep(extractBuildResult, 'Extract build result');
+    await runStep(removeExtractContainer, 'Remove extract container');
 }
 
 async function runStep(step, displayText) {
@@ -38,6 +41,14 @@ async function runStep(step, displayText) {
 
 async function buildAndPush() {
     await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config ${actionVariables.tags}`);
+}
+
+async function extractBuildResult() {
+    await exec.exec('docker cp extract:/app ./extracted-app');
+}
+
+async function removeExtractContainer() {
+    await exec.exec('docker rm extract');
 }
 
 async function logInDockerRegistry() {
@@ -59,6 +70,10 @@ async function prepare() {
     actionVariables.tags = `-t ${dockerImage}:${version}`;
 
     /* TODO */
+}
+
+async function removeNuGetConfig() {
+    await exec.exec('rm -f /tmp/nuget.config');
 }
 
 async function addNuGetConfig() {
