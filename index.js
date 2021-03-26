@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 const exec = require('@actions/exec');
+const glob = require('@actions/glob');
 
 // Input variable names
 const inputDockerPassword = 'docker-password';
@@ -25,6 +26,11 @@ async function run() {
     await runStep(createExtractContainer, 'Create extract container');
     await runStep(extractBuildResult, 'Extract build result');
     await runStep(removeExtractContainer, 'Remove extract container');
+
+    const globber = await glob.create('./extracted-app/**');
+    for await (const file of globber.globGenerator()) {
+        console.log(file)
+    }
 }
 
 async function runStep(step, displayText) {
