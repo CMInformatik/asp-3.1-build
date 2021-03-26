@@ -10,7 +10,7 @@ const myGetPreAuthUrl = 'myget-pre-auth-url';
 
 // Action variables
 let actionVariables = {
-    tags: '',
+    tag: '',
     dockerRegistry: 'registry.cmicloud.ch:4443'
 };
 
@@ -41,7 +41,7 @@ async function runStep(step, displayText) {
 }
 
 async function buildAndPush() {
-    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config ${actionVariables.tags}`);
+    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${actionVariables.tag}`);
 }
 
 async function extractBuildResult() {
@@ -49,7 +49,7 @@ async function extractBuildResult() {
 }
 
 async function createExtractContainer() {
-    await exec.exec('read tag <<< $(docker images -q) && docker create --name extract "$tag"');
+    await exec.exec(`docker create --name extract "${actionVariables.tag}"`);
 }
 
 async function removeExtractContainer() {
@@ -72,7 +72,7 @@ async function prepare() {
     let dockerImage = `${actionVariables.dockerRegistry}/${repositoryName}`;
     let version = `pr-${github.context.runNumber}`;
 
-    actionVariables.tags = `-t ${dockerImage}:${version}`;
+    actionVariables.tag = `${dockerImage}:${version}`;
 
     /* TODO */
 }
