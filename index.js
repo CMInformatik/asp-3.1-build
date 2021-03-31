@@ -39,10 +39,12 @@ async function run() {
 
     // Break up the JSON into individual outputs.
     const versionProperties = JSON.parse(versionJson);
-    for (let name in versionProperties.CloudBuildAllVars) {
+  /*  for (let name in versionProperties.CloudBuildAllVars) {
         await exec.exec(`echo ${name}`);
         core.setOutput(name.substring(5), versionProperties.CloudBuildAllVars[name]);
-    }
+    }*/
+
+    core.setOutput('NBGV_NuGetPackageVersion', versionProperties['CloudBuildAllVars']['NBGV_NuGetPackageVersion']);
 
     // await runStep(uploadArtifacts, 'Upload artifacts');
 }
