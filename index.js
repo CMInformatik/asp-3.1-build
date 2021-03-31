@@ -101,7 +101,7 @@ async function setUpVersion() {
         version = `pr-${ev.pull_request.number}`;
     }
 
-    tag = `${dockerImage}:${version}`;
+    tag = `${dockerImage}:${version} ${packageVersion}`;
 }
 
 async function removeNuGetConfig() {
