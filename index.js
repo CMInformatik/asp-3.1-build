@@ -34,7 +34,7 @@ async function run() {
     await exec.exec(`nbgv get-version -p ./code`);
 
     let versionJson = '';
-    await exec.exec('nbgv get-version -p ./code', { listeners: { stdout: (data) => { versionJson += data.toString() } } });
+    await exec.exec('nbgv get-version -p ./code', [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
     core.setOutput('versionJson', versionJson);
 
     // Break up the JSON into individual outputs.
