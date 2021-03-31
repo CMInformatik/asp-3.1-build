@@ -12,10 +12,7 @@ const inputAppName = 'app-name';
 const myGetPreAuthUrl = 'myget-pre-auth-url';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
 
-// Action variables
-let actionVariables = {
-    tag: '',
-};
+let tag = '';
 
 async function run() {
     await runStep(addNuGetConfig, 'Add NuGet config.');
@@ -45,7 +42,7 @@ async function runStep(step, displayText) {
 }
 
 async function buildAndPush() {
-    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${actionVariables.tag}`);
+    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${tag}`);
 }
 
 async function extractBuildResult() {
@@ -53,7 +50,7 @@ async function extractBuildResult() {
 }
 
 async function createExtractContainer() {
-    await exec.exec(`docker create --name extract "${actionVariables.tag}"`);
+    await exec.exec(`docker create --name extract "${tag}"`);
 }
 
 async function removeExtractContainer() {
@@ -78,9 +75,9 @@ async function setUpVersion() {
 
     if (github.context.ref.startsWith('refs/tags')) {
         version = github.context.ref.replace('refs/tags/', '');
-    } else if(github.context.ref.startsWith('refs/heads/')){
+    } else if (github.context.ref.startsWith('refs/heads/')) {
         version = github.context.ref.replace('refs/heads/', '').replace('/', '-');
-    } else if(github.context.ref.startsWith('refs/pull/')){
+    } else if (github.context.ref.startsWith('refs/pull/')) {
         const ev = JSON.parse(
             fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')
         );
@@ -88,7 +85,7 @@ async function setUpVersion() {
         version = `pr-${ev.pull_request.number}`;
     }
 
-    actionVariables.tag = `${dockerImage}:${version}`;
+    tag = `${dockerImage}:${version}`;
 }
 
 async function removeNuGetConfig() {
