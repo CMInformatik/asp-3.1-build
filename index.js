@@ -43,9 +43,9 @@ async function run() {
         await exec.exec(`echo ${name}`);
         core.setOutput(name.substring(5), versionProperties.CloudBuildAllVars[name]);
     }*/
-
-    core.setOutput('NBGV_NuGetPackageVersion', versionProperties['CloudBuildAllVars']['NBGV_NuGetPackageVersion']);
-
+    let v = versionProperties['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
+    await exec.exec(`echo VVVV`);
+    await exec.exec(`echo ${v}`);
     // await runStep(uploadArtifacts, 'Upload artifacts');
 }
 
