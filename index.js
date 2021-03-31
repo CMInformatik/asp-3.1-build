@@ -14,6 +14,7 @@ const inputAppName = 'app-name';
 const myGetPreAuthUrl = 'myget-pre-auth-url';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
 
+let dockerImage = '';
 let tag = '';
 let packageVersion = '';
 
@@ -58,7 +59,7 @@ async function getPackageVersion() {
 }
 
 async function buildAndPush() {
-    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${tag}`);
+    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${tag} -tag ${dockerImage}:${packageVersion}`);
 }
 
 async function extractBuildResult() {
@@ -86,8 +87,8 @@ async function setUpDockerBuildX() {
 
 async function setUpVersion() {
     let repositoryName = core.getInput(inputAppName).toLowerCase();
-    let dockerImage = `${dockerRegistry}/${repositoryName}`;
     let version = `edge`;
+    dockerImage = `${dockerRegistry}/${repositoryName}`;
 
     if (github.context.ref.startsWith('refs/tags')) {
         version = github.context.ref.replace('refs/tags/', '');
@@ -101,7 +102,7 @@ async function setUpVersion() {
         version = `pr-${ev.pull_request.number}`;
     }
 
-    tag = `${dockerImage}:${version} ${packageVersion}`;
+    tag = `${dockerImage}:${version}`;
 }
 
 async function removeNuGetConfig() {
