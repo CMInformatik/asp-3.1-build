@@ -60,7 +60,7 @@ async function getPackageVersion() {
 
 async function buildAndPush() {
     await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${tag} -t ${dockerImage}:${packageVersion}`);
-    await exec.exec(`docker push --all-tags ${tag}`);
+    await exec.exec(`docker push --all-tags ${dockerImage}`);
 }
 
 async function extractBuildResult() {
