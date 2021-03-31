@@ -15,10 +15,12 @@ const myGetPreAuthUrl = 'myget-pre-auth-url';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
 
 let tag = '';
+let packageVersion = '';
 
 async function run() {
     await runStep(addNuGetConfig, 'Add NuGet config.');
     await runStep(ensureMyGetNuGetSource, 'Ensure MyGet NuGet source.');
+    await runStep(getPackageVersion, 'Loading package version');
     await runStep(setUpVersion, 'Prepare docker version.');
     await runStep(setUpDockerBuildX, 'SetUp docker buildX');
     await runStep(logInDockerRegistry, 'Login docker registry');
@@ -27,26 +29,7 @@ async function run() {
     await runStep(createExtractContainer, 'Create extract container');
     await runStep(extractBuildResult, 'Extract build result');
     await runStep(removeExtractContainer, 'Remove extract container');
-
-    let installArgs = ['tool', 'install', '-g', 'nbgv'];
-    await exec.exec('dotnet', installArgs);
-    core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
-    await exec.exec(`nbgv get-version -p ./code`);
-
-    let versionJson = '';
-    await exec.exec('nbgv get-version -f json -p ./code', [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
-    core.setOutput('versionJson', versionJson);
-
-    // Break up the JSON into individual outputs.
-    const versionProperties = JSON.parse(versionJson);
-  /*  for (let name in versionProperties.CloudBuildAllVars) {
-        await exec.exec(`echo ${name}`);
-        core.setOutput(name.substring(5), versionProperties.CloudBuildAllVars[name]);
-    }*/
-    let v = versionProperties['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
-    await exec.exec(`echo VVVV`);
-    await exec.exec(`echo ${v}`);
-    // await runStep(uploadArtifacts, 'Upload artifacts');
+    await runStep(uploadArtifacts, 'Upload artifacts');
 }
 
 async function runStep(step, displayText) {
@@ -60,6 +43,18 @@ async function runStep(step, displayText) {
         core.setFailed(`Step "${displayText}" failed. Error: ${error.message}`);
         throw error;
     }
+}
+
+async function getPackageVersion() {
+    await exec.exec('dotnet tool install -g nbgv');
+    core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
+
+    await exec.exec(`nbgv get-version -p ./code`);
+
+    let versionJson = '';
+    await exec.exec('nbgv get-version -f json -p ./code', [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
+
+    packageVersion = JSON.parse(versionJson)['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
 }
 
 async function buildAndPush() {
@@ -128,7 +123,7 @@ async function uploadArtifacts() {
     const globber = await glob.create('./extracted-app/**');
     const files = await globber.glob();
 
-    await artifact.create().uploadArtifact(core.getInput(inputAppName), files, './extracted-app');
+    await artifact.create().uploadArtifact(`${core.getInput(inputAppName)}-${packageVersion}`, files, './extracted-app');
 }
 
 run().then(_ => {});
