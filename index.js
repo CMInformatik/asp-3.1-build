@@ -31,7 +31,7 @@ async function run() {
     let installArgs = ['tool', 'install', '-g', 'nbgv'];
     await exec.exec('dotnet', installArgs);
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
-    await exec.exec(`nbgv get-version`);
+    await exec.exec(`nbgv get-version -p ./code`);
 
     // await runStep(uploadArtifacts, 'Upload artifacts');
 }
