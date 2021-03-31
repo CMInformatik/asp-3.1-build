@@ -33,6 +33,17 @@ async function run() {
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
     await exec.exec(`nbgv get-version -p ./code`);
 
+    let versionJson = '';
+    await exec.exec('nbgv get-version -p ./code', { listeners: { stdout: (data) => { versionJson += data.toString() } } });
+    core.setOutput('versionJson', versionJson);
+
+    // Break up the JSON into individual outputs.
+    const versionProperties = JSON.parse(versionJson);
+    for (let name in versionProperties.CloudBuildAllVars) {
+        await exec.exec(`echo ${name}`);
+        core.setOutput(name.substring(5), versionProperties.CloudBuildAllVars[name]);
+    }
+
     // await runStep(uploadArtifacts, 'Upload artifacts');
 }
 
