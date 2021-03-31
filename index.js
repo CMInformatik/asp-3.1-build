@@ -4,6 +4,8 @@ const exec = require('@actions/exec');
 const glob = require('@actions/glob');
 const artifact = require('@actions/artifact');
 const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 // Input variable names
 const inputDockerPassword = 'docker-password';
@@ -26,8 +28,10 @@ async function run() {
     await runStep(extractBuildResult, 'Extract build result');
     await runStep(removeExtractContainer, 'Remove extract container');
 
-    await exec.exec(`dotnet tool install --tool-path /ngbv nbgv`);
-    await exec.exec(`/ngbv/nbgv get-version`);
+    let installArgs = ['tool', 'install', '-g', 'nbgv'];
+    await exec.exec('dotnet', installArgs);
+    core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
+    await exec.exec(`nbgv get-version`);
 
     // await runStep(uploadArtifacts, 'Upload artifacts');
 }
