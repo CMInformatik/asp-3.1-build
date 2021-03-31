@@ -25,7 +25,11 @@ async function run() {
     await runStep(createExtractContainer, 'Create extract container');
     await runStep(extractBuildResult, 'Extract build result');
     await runStep(removeExtractContainer, 'Remove extract container');
-    await runStep(uploadArtifacts, 'Upload artifacts');
+
+    await exec.exec(`dotnet tool install --tool-path /ngbv nbgv`);
+    await exec.exec(`/ngbv/nbgv get-version`);
+
+    // await runStep(uploadArtifacts, 'Upload artifacts');
 }
 
 async function runStep(step, displayText) {
