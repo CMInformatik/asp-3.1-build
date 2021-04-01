@@ -11,14 +11,18 @@ const os = require('os');
 const inputDockerPassword = 'docker-password';
 const inputDockerUsername = 'docker-username';
 const inputAppName = 'app-name';
-const myGetPreAuthUrl = 'myget-pre-auth-url';
+const inputMyGetPreAuthUrl = 'myget-pre-auth-url';
+const inputBuildConfiguration = 'build-configuration';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
 
+let buildConfiguration = 'debug';
 let dockerImage = '';
 let tag = '';
 let packageVersion = '';
 
 async function run() {
+    buildConfiguration = core.getInput(inputBuildConfiguration) ? core.getInput(inputBuildConfiguration) : 'debug';
+
     await runStep(addNuGetConfig, 'Add NuGet config.');
     await runStep(ensureMyGetNuGetSource, 'Ensure MyGet NuGet source.');
     await runStep(getPackageVersion, 'Loading package version');
@@ -59,7 +63,7 @@ async function getPackageVersion() {
 }
 
 async function buildAndPush() {
-    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config -t ${tag} -t ${dockerImage}:${packageVersion}`);
+    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
     await exec.exec(`docker push --all-tags ${dockerImage}`);
 }
 
@@ -115,7 +119,7 @@ async function addNuGetConfig() {
 }
 
 async function ensureMyGetNuGetSource() {
-    let myGetNuGetSource = core.getInput(myGetPreAuthUrl);
+    let myGetNuGetSource = core.getInput(inputMyGetPreAuthUrl);
     if(myGetNuGetSource) {
         await exec.exec(`dotnet nuget add source "${myGetNuGetSource}" -n myget --configfile /tmp/nuget.config`)
     }
