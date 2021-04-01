@@ -13,15 +13,18 @@ const inputDockerUsername = 'docker-username';
 const inputAppName = 'app-name';
 const inputMyGetPreAuthUrl = 'myget-pre-auth-url';
 const inputBuildConfiguration = 'build-configuration';
+const inputCheckOutPath = 'check-out-path';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
 
 let buildConfiguration = 'debug';
+let checkOutPath = '';
 let dockerImage = '';
 let tag = '';
 let packageVersion = '';
 
 async function run() {
     buildConfiguration = core.getInput(inputBuildConfiguration) ? core.getInput(inputBuildConfiguration) : 'debug';
+    checkOutPath = core.getInput(inputCheckOutPath) ? core.getInput(inputCheckOutPath) : '';
 
     await runStep(addNuGetConfig, 'Add NuGet config.');
     await runStep(ensureMyGetNuGetSource, 'Ensure MyGet NuGet source.');
@@ -54,16 +57,18 @@ async function getPackageVersion() {
     await exec.exec('dotnet tool install -g nbgv');
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
 
-    await exec.exec(`nbgv get-version -p ./code`);
+    await exec.exec(`nbgv get-version -p ./${checkOutPath}`);
 
     let versionJson = '';
-    await exec.exec('nbgv get-version -f json -p ./code', [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
+    await exec.exec(`nbgv get-version -f json -p ./${checkOutPath}`, [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
 
     packageVersion = JSON.parse(versionJson)['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
 }
 
 async function buildAndPush() {
-    await exec.exec(`docker build code --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
+    let dockerFile = checkOutPath ? checkOutPath : '.';
+
+    await exec.exec(`docker build ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
     await exec.exec(`docker push --all-tags ${dockerImage}`);
 }
 
