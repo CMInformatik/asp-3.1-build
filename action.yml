@@ -22,6 +22,8 @@ inputs:
 outputs:
   version:
     description: 'Build version'
+  artifact-name:
+    description: 'Name of uploaded artifact'
 runs:
   using: 'node12'
   main: 'index.js'

@@ -134,8 +134,10 @@ async function ensureMyGetNuGetSource() {
 async function uploadArtifacts() {
     const globber = await glob.create('./extracted-app/**');
     const files = await globber.glob();
+    const name = `${core.getInput(inputAppName)}-${packageVersion}`;
 
-    await artifact.create().uploadArtifact(`${core.getInput(inputAppName)}-${packageVersion}`, files, './extracted-app');
+    await artifact.create().uploadArtifact(name, files, './extracted-app');
+    core.setOutput("artifact-name", packageVersion);
 }
 
 run().then(_ => {});
