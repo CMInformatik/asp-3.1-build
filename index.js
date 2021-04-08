@@ -63,6 +63,7 @@ async function getPackageVersion() {
     await exec.exec(`nbgv get-version -f json -p ./${checkOutPath}`, [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
 
     packageVersion = JSON.parse(versionJson)['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
+    core.setOutput("version", packageVersion);
 }
 
 async function buildAndPush() {

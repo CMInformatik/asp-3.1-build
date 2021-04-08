@@ -19,6 +19,9 @@ inputs:
     description: 'Check-Out Path'
     required: false
     default: ''
+outputs:
+  version:
+    description: 'Build version'
 runs:
   using: 'node12'
   main: 'index.js'
