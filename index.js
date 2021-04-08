@@ -137,7 +137,7 @@ async function uploadArtifacts() {
     const name = `${core.getInput(inputAppName)}-${packageVersion}`;
 
     await artifact.create().uploadArtifact(name, files, './extracted-app');
-    core.setOutput("artifact-name", packageVersion);
+    core.setOutput("artifact-name", name);
 }
 
 run().then(_ => {});
