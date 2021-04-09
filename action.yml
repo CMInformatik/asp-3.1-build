@@ -22,6 +22,8 @@ inputs:
 outputs:
   version:
     description: 'Build version'
+  is-pre-release:
+    description: 'Is pre-release'
   artifact-name:
     description: 'Name of uploaded artifact'
 runs:

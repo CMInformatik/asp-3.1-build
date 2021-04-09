@@ -64,6 +64,13 @@ async function getPackageVersion() {
 
     packageVersion = JSON.parse(versionJson)['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
     core.setOutput("version", packageVersion);
+
+    let isPreRelease = false;
+    if(packageVersion.contains('-')) {
+        isPreRelease = true;
+    }
+
+    core.setOutput("is-pre-release", packageVersion);
 }
 
 async function buildAndPush() {
