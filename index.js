@@ -66,11 +66,11 @@ async function getPackageVersion() {
     core.setOutput("version", packageVersion);
 
     let isPreRelease = false;
-    if(packageVersion.contains('-')) {
+    if(packageVersion.includes('-')) {
         isPreRelease = true;
     }
 
-    core.setOutput("is-pre-release", packageVersion);
+    core.setOutput("is-pre-release", isPreRelease);
 }
 
 async function buildAndPush() {
