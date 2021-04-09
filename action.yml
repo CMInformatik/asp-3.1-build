@@ -11,6 +11,14 @@ inputs:
     required: true
   docker-password:
     required: true
+  push-to-docker-registry:
+    description: 'If set, the build output is pushed to Docker-Registry. '
+    required: false
+    default: false
+  push-to-octopus:
+    description: 'If set, the build output is pushed to Octopus.'
+    required: false
+    default: false
   build-configuration:
     description: 'Build configuration'
     required: false

@@ -15,6 +15,8 @@ const inputMyGetPreAuthUrl = 'myget-pre-auth-url';
 const inputBuildConfiguration = 'build-configuration';
 const inputCheckOutPath = 'check-out-path';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
+const pushToOctopus = 'push-to-octopus';
+const pushToDocker = ' push-to-docker-registry';
 
 let buildConfiguration = 'debug';
 let checkOutPath = '';
@@ -77,7 +79,10 @@ async function buildAndPush() {
     let dockerFile = checkOutPath ? checkOutPath : '.';
 
     await exec.exec(`docker build ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
-    await exec.exec(`docker push --all-tags ${dockerImage}`);
+    
+    if (core.getInput(pushToDocker)) {
+        await exec.exec(`docker push --all-tags ${dockerImage}`);
+    }
 }
 
 async function extractBuildResult() {
