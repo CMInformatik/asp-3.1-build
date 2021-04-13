@@ -90,7 +90,7 @@ async function buildAndPush() {
     }
 
     dockerFile = dockerFile.replace(/(\r\n|\n|\r)/gm, '');
-    await exec.exec(`docker build ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
+    await exec.exec(`docker build . -f ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
     
     if (core.getInput(pushToDocker)) {
         await exec.exec(`docker push --all-tags ${dockerImage}`);
