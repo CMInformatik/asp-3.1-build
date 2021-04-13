@@ -59,11 +59,12 @@ async function getPackageVersion() {
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
 
     let versionJsonPath = undefined;
-    await exec.exec('find . -name "version.json"', [], { listeners: { stdout: (data) => { versionJsonPath = data } } });
+    await exec.exec('find . -name "version.json"', [], { listeners: { stdout: (data) => { versionJsonPath = data.toString() } } });
     if(!versionJsonPath) {
         console.error('Version Json not found.');
     }
 
+    console.log(versionJsonPath);
     await exec.exec(`nbgv get-version -p ${versionJsonPath}`);
 
     let versionJson = '';
