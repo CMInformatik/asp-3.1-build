@@ -13,19 +13,16 @@ const inputDockerUsername = 'docker-username';
 const inputAppName = 'app-name';
 const inputMyGetPreAuthUrl = 'myget-pre-auth-url';
 const inputBuildConfiguration = 'build-configuration';
-const inputCheckOutPath = 'check-out-path';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
 const pushToDocker = ' push-to-docker-registry';
 
 let buildConfiguration = 'debug';
-let checkOutPath = '';
 let dockerImage = '';
 let tag = '';
 let packageVersion = '';
 
 async function run() {
     buildConfiguration = core.getInput(inputBuildConfiguration) ? core.getInput(inputBuildConfiguration) : 'debug';
-    checkOutPath = core.getInput(inputCheckOutPath) ? core.getInput(inputCheckOutPath) : '';
 
     await runStep(addNuGetConfig, 'Add NuGet config.');
     await runStep(ensureMyGetNuGetSource, 'Ensure MyGet NuGet source.');
@@ -82,7 +79,12 @@ async function getPackageVersion() {
 }
 
 async function buildAndPush() {
-    let dockerFile = checkOutPath ? checkOutPath : '.';
+    let dockerFile = undefined;
+    
+    await exec.exec('find . -name "Dockerfile"', [], { listeners: { stdout: (data) => { dockerFile = data.toString() } } });
+    if(!dockerFile) {
+        console.error('Dockerfile not found');
+    }
 
     await exec.exec(`docker build ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
     

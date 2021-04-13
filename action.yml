@@ -19,10 +19,6 @@ inputs:
     description: 'Build configuration'
     required: false
     default: 'debug'
-  check-out-path:
-    description: 'Check-Out Path'
-    required: false
-    default: ''
 outputs:
   version:
     description: 'Build version'
