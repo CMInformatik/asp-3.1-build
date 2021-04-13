@@ -58,15 +58,15 @@ async function getPackageVersion() {
     await exec.exec('dotnet tool install -g nbgv');
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
 
-    const versionJson = await exec.exec('find . -name "version.json"');
-    if(!versionJson) {
+    const versionJsonPath = await exec.exec('find . -name "version.json"');
+    if(!versionJsonPath) {
         console.error('Version Json not found.');
     }
 
-    await exec.exec(`nbgv get-version -p ${versionJson}`);
+    await exec.exec(`nbgv get-version -p ${versionJsonPath}`);
 
     let versionJson = '';
-    await exec.exec(`nbgv get-version -f json -p ${versionJson}`, [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
+    await exec.exec(`nbgv get-version -f json -p ${versionJsonPath}`, [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
 
     packageVersion = JSON.parse(versionJson)['CloudBuildAllVars']['NBGV_NuGetPackageVersion'];
     core.setOutput("version", packageVersion);
