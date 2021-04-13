@@ -64,8 +64,6 @@ async function getPackageVersion() {
         console.error('Version Json not found.');
     }
 
-    let versionJsonPath = undefined;
-
     await exec.exec(`dirname ${versionJsonPath}` [], { listeners: { stdout: (data) => { versionJsonDirectory = `${data.toString()}/` } } });
     await exec.exec(`nbgv get-version -p ${versionJsonDirectory}`);
     await exec.exec(`nbgv get-version -f json -p ${versionJsonDirectory}`, [], { listeners: { stdout: (data) => { versionJson += data.toString() } } });
