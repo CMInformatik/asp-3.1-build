@@ -58,7 +58,8 @@ async function getPackageVersion() {
     await exec.exec('dotnet tool install -g nbgv');
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
 
-    const versionJsonPath = await exec.exec('find . -name "version.json"');
+    let versionJsonPath = undefined;
+    await exec.exec('find . -name "version.json"', [], { listeners: { stdout: (data) => { versionJsonPath = data } } });
     if(!versionJsonPath) {
         console.error('Version Json not found.');
     }
