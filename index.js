@@ -57,7 +57,7 @@ async function getPackageVersion() {
 
     let versionJsonPath = undefined;
 
-    await exec.exec('dirname $(find . -name "version.json")', [], { listeners: { stdout: (data) => { versionJsonPath = data.toString() } } });
+    await exec.exec('find . -name "version.json"', [], { listeners: { stdout: (data) => { versionJsonPath = data.toString() } } });
     if(!versionJsonPath) {
         console.error('Version Json not found.');
     }
