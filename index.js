@@ -14,7 +14,7 @@ const inputAppName = 'app-name';
 const inputMyGetPreAuthUrl = 'myget-pre-auth-url';
 const inputBuildConfiguration = 'build-configuration';
 const dockerRegistry = 'registry.cmicloud.ch:4443';
-const pushToDocker = ' push-to-docker-registry';
+const pushToDocker = 'push-to-docker-registry';
 
 let buildConfiguration = 'debug';
 let dockerImage = '';
