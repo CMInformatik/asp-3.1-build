@@ -30,11 +30,17 @@ async function run() {
     await runStep(setUpVersion, 'Prepare docker version.');
     await runStep(setUpDockerBuildX, 'SetUp docker buildX');
     await runStep(logInDockerRegistry, 'Login docker registry');
-    await runStep(buildAndPush, 'Build and push docker container');
-    await runStep(removeNuGetConfig, 'Remove NuGet config');
-    await runStep(createExtractContainer, 'Create extract container');
-    await runStep(extractBuildResult, 'Extract build result');
-    await runStep(removeExtractContainer, 'Remove extract container');
+
+    try {
+        await runStep(buildAndPush, 'Build and push docker container');
+    }
+    finally {
+        await runStep(removeNuGetConfig, 'Remove NuGet config');
+        await runStep(createExtractContainer, 'Create extract container');
+        await runStep(extractBuildResult, 'Extract build result');
+        await runStep(removeExtractContainer, 'Remove extract container');
+    }
+
     await runStep(uploadArtifacts, 'Upload artifacts');
 }
 
@@ -56,10 +62,10 @@ async function getPackageVersion() {
         console.log("installing nbgv via dotnet tool");
         await exec.exec('dotnet tool install -g nbgv');
         console.log("done installing nbgv via dotnet tool");
-    } catch(err) {
+    } catch (err) {
         console.log(`Error while installing nbgv: ${err}. We try to proceed anyway.`)
     }
-    
+
     core.addPath(path.join(os.homedir(), '.dotnet', 'tools'));
 
     let versionJsonPath = undefined;
@@ -67,7 +73,7 @@ async function getPackageVersion() {
     let versionJson = '';
 
     await exec.exec('find . -name "version.json"', [], { listeners: { stdout: (data) => { versionJsonPath = data.toString() } } });
-    if(!versionJsonPath) {
+    if (!versionJsonPath) {
         console.error('Version Json not found.');
     }
 
@@ -81,7 +87,7 @@ async function getPackageVersion() {
     core.setOutput("version", packageVersion);
 
     let isPreRelease = false;
-    if(packageVersion.includes('-')) {
+    if (packageVersion.includes('-')) {
         isPreRelease = true;
     }
 
@@ -90,15 +96,15 @@ async function getPackageVersion() {
 
 async function buildAndPush() {
     let dockerFile = undefined;
-    
+
     await exec.exec('find . -name "Dockerfile"', [], { listeners: { stdout: (data) => { dockerFile = data.toString() } } });
-    if(!dockerFile) {
+    if (!dockerFile) {
         console.error('Dockerfile not found');
     }
 
     dockerFile = dockerFile.replace(/(\r\n|\n|\r)/gm, '');
     await exec.exec(`docker build . -f ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
-    
+
     if (core.getInput(pushToDocker)) {
         await exec.exec(`docker push --all-tags ${dockerImage}`);
     }
@@ -157,7 +163,7 @@ async function addNuGetConfig() {
 
 async function ensureMyGetNuGetSource() {
     let myGetNuGetSource = core.getInput(inputMyGetPreAuthUrl);
-    if(myGetNuGetSource) {
+    if (myGetNuGetSource) {
         await exec.exec(`dotnet nuget add source "${myGetNuGetSource}" -n myget --configfile /tmp/nuget.config`)
     }
 }
@@ -171,4 +177,4 @@ async function uploadArtifacts() {
     core.setOutput("artifact-name", name);
 }
 
-run().then(_ => {});
+run().then(_ => { });
