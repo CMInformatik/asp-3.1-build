@@ -13,8 +13,8 @@ const inputDockerUsername = 'docker-username';
 const inputAppName = 'app-name';
 const inputMyGetPreAuthUrl = 'myget-pre-auth-url';
 const inputBuildConfiguration = 'build-configuration';
-const dockerRegistry = 'registry.cmicloud.ch:4443';
-const pushToDocker = 'push-to-docker-registry';
+const inputDockerRegistry = 'docker-registry-url';
+const inputPushToDocker = 'push-to-docker-registry';
 
 let buildConfiguration = 'debug';
 let dockerImage = '';
@@ -105,7 +105,7 @@ async function buildAndPush() {
     dockerFile = dockerFile.replace(/(\r\n|\n|\r)/gm, '');
     await exec.exec(`docker build . -f ${dockerFile} --secret id=nuget_config,src=/tmp/nuget.config --build-arg buildConfiguration:${buildConfiguration} -t ${tag} -t ${dockerImage}:${packageVersion} `);
 
-    if (core.getInput(pushToDocker)) {
+    if (core.getInput(inputPushToDocker)) {
         await exec.exec(`docker push --all-tags ${dockerImage}`);
     }
 }
@@ -125,6 +125,7 @@ async function removeExtractContainer() {
 async function logInDockerRegistry() {
     let password = core.getInput(inputDockerPassword);
     let username = core.getInput(inputDockerUsername);
+    let dockerRegistry = core.getInput(inputDockerRegistry);
 
     await exec.exec(`docker login ${dockerRegistry} --username "${username}" --password "${password}"`);
 }
@@ -135,7 +136,9 @@ async function setUpDockerBuildX() {
 
 async function setUpVersion() {
     let repositoryName = core.getInput(inputAppName).toLowerCase();
+    let dockerRegistry = core.getInput(inputDockerRegistry);
     let version = `edge`;
+    
     dockerImage = `${dockerRegistry}/${repositoryName}`;
 
     if (github.context.ref.startsWith('refs/tags')) {
