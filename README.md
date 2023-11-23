@@ -3,7 +3,7 @@ Github Action for building ASP Core 3.1 Web Applications in Docker
 
 # Verwendung
 Diese Action nutzt ein Dockerfile im Hauptverzeichis des Zielrepositories, um ein lauffähiges Docker-Image zu erzeugen.  
-Sie überträgt dieses Docker-Image in eine Registry ( default:`registry.cmicloud.ch` ).  
+Sie überträgt dieses Docker-Image in eine Registry ( default:`cminformatik.azurecr.io` ).  
 Ausserdem extrahiert sie die Binaries der App aus dem Docker-Image und legt sie in Github als Artefakte ab.  
 Dazu erwartet sie, dass die Applikation sich im Verszeichnis `/app` des Docker-Images befindet.
 
