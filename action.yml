@@ -13,7 +13,7 @@ inputs:
     required: true
   docker-registry-url:
     required: false
-    default: 'registry.cmicloud.ch:4443'
+    default: 'cminformatik.azurecr.io'
     description: 'Pushes the image to this registry if input push-to-docker-registry is set'
   push-to-docker-registry:
     description: 'If set, the build output is pushed to Docker-Registry. '
